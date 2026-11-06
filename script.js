@@ -1,41 +1,65 @@
-let transactions = JSON.parse(localStorage.getItem("tx")) || [];
+const balance = document.getElementById('balance');
+const money_plus = document.getElementById('money-plus');
+const money_minus = document.getElementById('money-minus');
+const list = document.getElementById('list');
+const form = document.getElementById('form');
+const text = document.getElementById('text');
+const amount = document.getElementById('amount');
 
-function addTransaction(){
-  const text = document.getElementById("text").value;
-  const amount = +document.getElementById("amount").value;
-  if(!text || !amount) return alert("تفصیل اور رقم لکھیں");
-  
-  transactions.push({id: Date.now(), text, amount});
-  localStorage.setItem("tx", JSON.stringify(transactions));
-  
-  document.getElementById("text").value = "";
-  document.getElementById("amount").value = "";
-  updateUI();
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+function addTransaction(e) {
+  e.preventDefault();
+  if(text.value.trim() === '' || amount.value.trim() === '') {
+    alert('Please add description and amount');
+    return;
+  }
+  const transaction = {
+    id: Math.floor(Math.random()*1000000),
+    text: text.value,
+    amount: +amount.value
+  };
+  transactions.push(transaction);
+  addTransactionDOM(transaction);
+  updateValues();
+  updateLocalStorage();
+  text.value = '';
+  amount.value = '';
 }
 
-function removeTx(id){
+function addTransactionDOM(transaction) {
+  const sign = transaction.amount < 0 ? '-' : '+';
+  const item = document.createElement('li');
+  item.classList.add(transaction.amount < 0 ? 'minus' : 'plus');
+  item.innerHTML = `${transaction.text} <span>${sign}${Math.abs(transaction.amount)} PKR</span> <button class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>`;
+  list.appendChild(item);
+}
+
+function updateValues() {
+  const amounts = transactions.map(t => t.amount);
+  const total = amounts.reduce((acc, item) => acc + item, 0).toFixed(2);
+  const income = amounts.filter(item => item > 0).reduce((acc, item) => acc + item, 0).toFixed(2);
+  const expense = (amounts.filter(item => item < 0).reduce((acc, item) => acc + item, 0) * -1).toFixed(2);
+  balance.innerText = `${total} PKR`;
+  money_plus.innerText = `${income} PKR`;
+  money_minus.innerText = `${expense} PKR`;
+}
+
+function removeTransaction(id) {
   transactions = transactions.filter(t => t.id !== id);
-  localStorage.setItem("tx", JSON.stringify(transactions));
-  updateUI();
+  updateLocalStorage();
+  init();
 }
 
-function updateUI(){
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-  let income=0, expense=0, balance=0;
-  
-  transactions.forEach(t=>{
-    const li = document.createElement("li");
-    li.className = t.amount > 0 ? "income" : "expense";
-    li.innerHTML = `${t.text} <span>${t.amount} PKR <button onclick="removeTx(${t.id})" style="background:red;color:white;border:none;border-radius:50%;width:20px">x</button></span>`;
-    list.appendChild(li);
-    balance += t.amount;
-    if(t.amount > 0) income += t.amount; else expense += t.amount;
-  });
-  
-  document.getElementById("balance").innerText = balance + " PKR";
-  document.getElementById("income").innerText = income + " PKR";
-  document.getElementById("expense").innerText = Math.abs(expense) + " PKR";
+function updateLocalStorage() {
+  localStorage.setItem('transactions', JSON.stringify(transactions));
 }
 
-updateUI();
+function init() {
+  list.innerHTML = '';
+  transactions.forEach(addTransactionDOM);
+  updateValues();
+}
+
+init();
+form.addEventListener('submit', addTransaction);
