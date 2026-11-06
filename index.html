@@ -1,31 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Expense Tracker - Germany</title>
-<link rel="stylesheet" href="style.css">
+<title>Expense Tracker</title>
+<style>
+body{background:linear-gradient(135deg,#667eea,#764ba2);font-family:Arial;display:flex;justify-content:center;padding:20px;min-height:100vh}
+.container{background:white;width:100%;max-width:400px;border-radius:15px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+h2{margin:0} .card{background:#f7f7f7;padding:10px;border-radius:10px;text-align:center}
+.inc-exp{display:flex;justify-content:space-between;margin:15px 0;background:#f7f7f7;padding:10px;border-radius:10px}
+.plus{color:green;font-weight:bold} .minus{color:red;font-weight:bold}
+input,button{width:100%;padding:12px;margin:5px 0;border-radius:8px;border:1px solid #ddd;box-sizing:border-box}
+button{background:#667eea;color:white;border:none;font-weight:bold;cursor:pointer}
+ul{list-style:none;padding:0} li{background:#f7f7f7;padding:10px;margin:5px 0;border-radius:5px;display:flex;justify-content:space-between}
+li.plus{border-right:5px solid green} li.minus{border-right:5px solid red}
+.delete-btn{background:red;color:white;border:none;width:25px;height:25px;border-radius:50%;cursor:pointer}
+</style>
 </head>
 <body>
 <div class="container">
 <h2>💰 Expense Tracker</h2>
-<p>Germany Portfolio Project by Emirhan</p>
-<div class="card">
-<h4>Balance</h4>
-<h1 id="balance">0 PKR</h1>
-</div>
-<div class="inc-exp">
-<div><h4>Income</h4><p id="money-plus" class="plus">0 PKR</p></div>
-<div><h4>Expense</h4><p id="money-minus" class="minus">0 PKR</p></div>
-</div>
-<h3>History</h3>
-<ul id="list"></ul>
+<p>Germany Portfolio by Emirhan</p>
+<div class="card"><h4>Balance</h4><h1 id="balance">0 PKR</h1></div>
+<div class="inc-exp"><div><h4>Income</h4><p id="income" class="plus">0 PKR</p></div><div><h4>Expense</h4><p id="expense" class="minus">0 PKR</p></div></div>
+<h3>History</h3><ul id="list"></ul>
 <h3>Add Transaction</h3>
-<form id="form">
-<input type="text" id="text" placeholder="Enter description...">
-<input type="number" id="amount" placeholder="Amount - use minus for expense">
-<button>Add Transaction</button>
-</form>
+<input type="text" id="text" placeholder="e.g. Salary">
+<input type="number" id="amount" placeholder="e.g. 5000 or -1500 for expense">
+<button onclick="addTrans()">Add Transaction</button>
 </div>
-<script src="script.js"></script>
+<script>
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+const list=document.getElementById('list'),balance=document.getElementById('balance'),income=document.getElementById('income'),expense=document.getElementById('expense');
+function addTrans(){
+  const t=document.getElementById('text'),a=document.getElementById('amount');
+  if(t.value===''||a.value===''){alert('Fill both fields');return;}
+  transactions.push({id:Date.now(),text:t.value,amount:+a.value});
+  localStorage.setItem('transactions',JSON.stringify(transactions));
+  t.value='';a.value='';init();
+}
+function removeTrans(id){
+  transactions=transactions.filter(x=>x.id!==id);
+  localStorage.setItem('transactions',JSON.stringify(transactions));
+  init();
+}
+function init(){
+  list.innerHTML='';
+  let total=0,inc=0,exp=0;
+  transactions.forEach(tr=>{
+    total+=tr.amount;
+    if(tr.amount>0)inc+=tr.amount;else exp+=tr.amount;
+    const li=document.createElement('li');
+    li.classList.add(tr.amount>0?'plus':'minus');
+    li.innerHTML=`${tr.text} <span>${tr.amount} PKR <button class='delete-btn' onclick='removeTrans(${tr.id})'>x</button></span>`;
+    list.appendChild(li);
+  });
+  balance.innerText=total+' PKR';
+  income.innerText=inc+' PKR';
+  expense.innerText=Math.abs(exp)+' PKR';
+}
+init();
+</script>
 </body>
 </html>
