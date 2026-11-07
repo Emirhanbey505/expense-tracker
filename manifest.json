@@ -1,0 +1,16 @@
+{
+  "name": "Expense Tracker by Emirhan",
+  "short_name": "Expense",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "description": "Germany Portfolio Project - Expense Tracker",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1570/1570990.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
